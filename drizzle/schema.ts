@@ -31,7 +31,7 @@ export const registrations = mysqlTable("registrations", {
   scheduledDate: timestamp("scheduledDate"),
   technicianName: varchar("technicianName", { length: 100 }),
   technicianPhone: varchar("technicianPhone", { length: 20 }),
-  status: mysqlEnum("status", ["pending", "contacted", "scheduled", "in_progress", "completed", "cancelled"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "contacted", "scheduled", "in_progress", "completed", "cancelled", "out_of_coverage"]).default("pending").notNull(),
   contractSigned: varchar("contractSigned", { length: 10 }).default("no"),
   contractSignedAt: timestamp("contractSignedAt"),
   signatureData: text("signatureData"),

@@ -35,6 +35,38 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  
+  // Simple REST API for staff admin (before tRPC)
+  app.get("/api/staff/orders", async (req, res) => {
+    try {
+      const token = req.query.token as string;
+      if (token !== "scl2024admin") {
+        return res.status(401).json({ error: "Invalid token" });
+      }
+      const { getAllRegistrations } = await import("../db");
+      const orders = await getAllRegistrations();
+      res.json({ success: true, data: orders });
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+  
+  app.post("/api/staff/update-status", async (req, res) => {
+    try {
+      const { token, id, status } = req.body;
+      if (token !== "scl2024admin") {
+        return res.status(401).json({ error: "Invalid token" });
+      }
+      const { updateRegistrationStatus } = await import("../db");
+      await updateRegistrationStatus(id, status);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      res.status(500).json({ error: "Failed to update status" });
+    }
+  });
+  
   // tRPC API
   app.use(
     "/api/trpc",

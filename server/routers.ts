@@ -42,14 +42,15 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const id = await db.createRegistration(input);
         
-        // إرسال إشعار للمالك
-        const locationInfo = input.latitude && input.longitude
-          ? `\n\n📍 الموقع الجغرافي:\nhttps://www.google.com/maps?q=${input.latitude},${input.longitude}`
-          : '';
+        // إرسال إشعار للمالك (اختياري)
+        try {
+          const locationInfo = input.latitude && input.longitude
+            ? `\n\n📍 الموقع الجغرافي:\nhttps://www.google.com/maps?q=${input.latitude},${input.longitude}`
+            : '';
 
-        await notifyOwner({
-          title: "طلب تسجيل جديد في خدمة الألياف البصرية",
-                  content: `تم استلام طلب تسجيل جديد:
+          await notifyOwner({
+            title: "طلب تسجيل جديد في خدمة الألياف البصرية",
+            content: `تم استلام طلب تسجيل جديد:
 
 🔢 رقم التتبع: ${id}
 
@@ -57,7 +58,11 @@ export const appRouter = router({
 📞 الهاتف: ${input.phoneNumber}
 📧 البريد: ${input.email || 'غير متوفر'}
 📦 الباقة: ${packageNames[input.packageType]}${locationInfo}`,
-        });
+          });
+        } catch (error) {
+          // تجاهل أخطاء الإشعارات - التسجيل تم بنجاح
+          console.log('[Registration] Notification failed, but registration was successful:', error);
+        }
         
         return { success: true, id };
       }),
@@ -65,6 +70,17 @@ export const appRouter = router({
     list: protectedProcedure.query(async () => {
       return await db.getAllRegistrations();
     }),
+    
+    // نقطة وصول عامة للإدارة السريعة (محمية برمز)
+    listWithToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        // رمز بسيط للوصول السريع
+        if (input.token !== "scl2024admin") {
+          throw new Error("Invalid access token");
+        }
+        return await db.getAllRegistrations();
+      }),
     
     getById: publicProcedure
       .input(z.object({ id: z.string() }))
@@ -75,9 +91,25 @@ export const appRouter = router({
     updateStatus: protectedProcedure
       .input(z.object({
         id: z.string(),
-        status: z.enum(["pending", "contacted", "scheduled", "in_progress", "completed", "cancelled"]),
+        status: z.enum(["pending", "contacted", "scheduled", "in_progress", "completed", "cancelled", "out_of_coverage"]),
       }))
       .mutation(async ({ input }) => {
+        await db.updateRegistrationStatus(input.id, input.status);
+        return { success: true };
+      }),
+    
+    // نقطة وصول عامة لتحديث الحالة (محمية برمز)
+    updateStatusWithToken: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        id: z.string(),
+        status: z.enum(["pending", "contacted", "scheduled", "in_progress", "completed", "cancelled", "out_of_coverage"]),
+      }))
+      .mutation(async ({ input }) => {
+        // رمز بسيط للوصول السريع
+        if (input.token !== "scl2024admin") {
+          throw new Error("Invalid access token");
+        }
         await db.updateRegistrationStatus(input.id, input.status);
         return { success: true };
       }),

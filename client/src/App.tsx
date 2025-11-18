@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Contract from "./pages/Contract";
 import Admin from "./pages/Admin";
+import SimpleAdmin from "./pages/SimpleAdmin";
 import TrackOrder from "./pages/TrackOrder";
 import Coverage from "./pages/Coverage";
 
@@ -15,6 +16,7 @@ function Router() {
   return (    <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/admin"} component={Admin} />
+      <Route path={"/simple-admin"} component={SimpleAdmin} />
       <Route path={"/contract"} component={Contract} />
       <Route path={"/track"} component={TrackOrder} />
       <Route path={"/coverage"} component={Coverage} />

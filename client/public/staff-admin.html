@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الموظفين - SCL Communication</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .login-btn:hover {
+            transform: scale(1.02);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: none;
+        }
+        
+        .admin-header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 {
+            color: #667eea;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .logout-btn {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: #666;
+        }
+        
+        .orders-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .section-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+        
+        .refresh-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .refresh-btn:hover {
+            background: #5568d3;
+        }
+        
+        .order-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .order-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .order-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .order-id {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .order-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            min-width: 80px;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        .phone-link, .email-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .phone-link:hover, .email-link:hover {
+            text-decoration: underline;
+        }
+        
+        .status-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .status-select {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        
+        .update-btn {
+            padding: 10px 25px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .update-btn:hover {
+            background: #218838;
+        }
+        
+        .update-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-contacted { background: #d1ecf1; color: #0c5460; }
+        .status-scheduled { background: #e2e3e5; color: #383d41; }
+        .status-in_progress { background: #f8d7da; color: #721c24; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        
+        .package-badge {
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginScreen">
+        <div class="login-header">
+            <h1>🔐 تسجيل الدخول</h1>
+            <p>لوحة تحكم الموظفين</p>
+        </div>
+        
+        <div class="error-message" id="loginError"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="username" placeholder="أدخل اسم المستخدم" required>
+            </div>
+            
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور" required>
+            </div>
+            
+            <button type="submit" class="login-btn">دخول</button>
+        </form>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; font-size: 0.9em;">
+            <strong>بيانات الدخول الافتراضية:</strong><br>
+            اسم المستخدم: <code>admin</code><br>
+            كلمة المرور: <code>scl2024</code>
+        </div>
+    </div>
+    
+    <!-- Admin Dashboard -->
+    <div class="admin-container" id="adminDashboard">
+        <div class="admin-header">
+            <h1>📊 لوحة تحكم الموظفين</h1>
+            <div class="user-info">
+                <span class="user-name" id="currentUser"></span>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="totalOrders">0</h3>
+                <p>إجمالي الطلبات</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="pendingOrders">0</h3>
+                <p>قيد الانتظار</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="completedOrders">0</h3>
+                <p>مكتمل</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="todayOrders">0</h3>
+                <p>طلبات اليوم</p>
+            </div>
+        </div>
+        
+        <div class="orders-section">
+            <div class="section-header">
+                <h2>قائمة الطلبات</h2>
+                <div>
+                    <button class="refresh-btn" onclick="exportToExcel()" style="background: #10b981; margin-left: 10px;">📄 تصدير Excel</button>
+                    <button class="refresh-btn" onclick="loadOrders()">🔄 تحديث</button>
+                </div>
+            </div>
+            
+            <div id="ordersContainer" class="loading">
+                جاري تحميل الطلبات...
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Users database
+        const users = {
+            'admin': 'scl2024',
+            'manager': 'manager123',
+            'staff': 'staff123'
+        };
+        
+        const API_TOKEN = 'scl2024admin';
+        let orders = [];
+        
+        // Check if user is logged in
+        window.onload = function() {
+            const loggedInUser = localStorage.getItem('staffUser');
+            if (loggedInUser) {
+                showDashboard(loggedInUser);
+            }
+        };
+        
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (users[username] && users[username] === password) {
+                localStorage.setItem('staffUser', username);
+                errorDiv.style.display = 'none';
+                showDashboard(username);
+            } else {
+                errorDiv.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة';
+                errorDiv.style.display = 'block';
+            }
+        });
+        
+        function showDashboard(username) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+            document.getElementById('currentUser').textContent = username;
+            loadOrders();
+        }
+        
+        function logout() {
+            localStorage.removeItem('staffUser');
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+        
+        function getPackageLabel(packageType) {
+            const labels = {
+                "100mbps": "100 ميغابت",
+                "200mbps": "200 ميغابت",
+                "500mbps": "500 ميغابت"
+            };
+            return labels[packageType] || packageType;
+        }
+        
+        function getStatusLabel(status) {
+            const labels = {
+                "pending": "قيد الانتظار",
+                "contacted": "تم الاتصال",
+                "scheduled": "تم الجدولة",
+                "in_progress": "قيد التنفيذ",
+                "completed": "مكتمل",
+                "cancelled": "ملغى",
+                "out_of_coverage": "خارج التغطية"
+            };
+            return labels[status] || status;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'غير متوفر';
+            const date = new Date(dateString);
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            };
+            return date.toLocaleString('ar-EG', options);
+        }
+        
+        async function loadOrders() {
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = '<div class="loading">جاري تحميل الطلبات...</div>';
+            
+            try {
+                // Fetch orders from API
+                const response = await fetch('/api/staff/orders?token=' + API_TOKEN);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                
+                const data = await response.json();
+                orders = data.data || [];
+                
+                // Update stats
+                document.getElementById('totalOrders').textContent = orders.length;
+                document.getElementById('pendingOrders').textContent = orders.filter(o => o.status === 'pending').length;
+                document.getElementById('completedOrders').textContent = orders.filter(o => o.status === 'completed').length;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const todayOrders = orders.filter(o => o.createdAt && o.createdAt.startsWith(today));
+                document.getElementById('todayOrders').textContent = todayOrders.length;
+                
+                // Render orders
+                container.innerHTML = '';
+                
+                if (orders.length === 0) {
+                    container.innerHTML = '<div class="loading">لا توجد طلبات حالياً</div>';
+                    return;
+                }
+                
+                orders.forEach((order, index) => {
+                    const orderCard = document.createElement('div');
+                    orderCard.className = 'order-card';
+                    orderCard.id = `order-${order.id}`;
+                    orderCard.innerHTML = `
+                        <div class="order-header-row">
+                            <div class="order-id">🔢 ${order.id}</div>
+                            <div class="status-badge status-${order.status}">${getStatusLabel(order.status)}</div>
+                        </div>
+                        <div class="order-details-grid">
+                            <div class="detail-row">
+                                <span class="detail-label">👤 الاسم:</span>
+                                <span class="detail-value">${order.fullName}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">📞 الهاتف:</span>
+                                <a href="tel:${order.phoneNumber}" class="phone-link">${order.phoneNumber}</a>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">📧 البريد:</span>
+                                <a href="mailto:${order.email || ''}" class="email-link">${order.email || 'غير متوفر'}</a>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">📦 الباقة:</span>
+                                <span class="package-badge">${getPackageLabel(order.packageType)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">📅 التاريخ:</span>
+                                <span class="detail-value">${formatDate(order.createdAt)}</span>
+                            </div>
+                        </div>
+                        <div class="status-controls">
+                            <select class="status-select" id="status-${order.id}">
+                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>قيد الانتظار</option>
+                                <option value="contacted" ${order.status === 'contacted' ? 'selected' : ''}>تم الاتصال</option>
+                                <option value="scheduled" ${order.status === 'scheduled' ? 'selected' : ''}>تم الجدولة</option>
+                                <option value="in_progress" ${order.status === 'in_progress' ? 'selected' : ''}>قيد التنفيذ</option>
+                                <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>مكتمل</option>
+                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>ملغى</option>
+                                <option value="out_of_coverage" ${order.status === 'out_of_coverage' ? 'selected' : ''}>خارج التغطية</option>
+                            </select>
+                            <button class="update-btn" onclick="updateStatus('${order.id}')">تحديث الحالة</button>
+                        </div>
+                        <div class="success-message" id="success-${order.id}"></div>
+                        <div class="error-msg" id="error-${order.id}"></div>
+                    `;
+                    container.appendChild(orderCard);
+                });
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                container.innerHTML = '<div class="loading" style="color: #dc3545;">❌ خطأ في تحميل الطلبات. حاول مرة أخرى.</div>';
+            }
+        }
+        
+        async function updateStatus(orderId) {
+            const newStatus = document.getElementById(`status-${orderId}`).value;
+            const successMsg = document.getElementById(`success-${orderId}`);
+            const errorMsg = document.getElementById(`error-${orderId}`);
+            const updateBtn = document.querySelector(`#order-${orderId} .update-btn`);
+            
+            // Disable button during update
+            updateBtn.disabled = true;
+            updateBtn.textContent = 'جاري التحديث...';
+            
+            // Hide previous messages
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+            
+            try {
+                // Send update to API
+                const response = await fetch('/api/staff/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token: API_TOKEN,
+                        id: orderId,
+                        status: newStatus
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update status');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message
+                    successMsg.textContent = '✅ تم تحديث الحالة بنجاح في قاعدة البيانات!';
+                    successMsg.style.display = 'block';
+                    
+                    // Reload orders to update UI
+                    setTimeout(() => {
+                        loadOrders();
+                    }, 1500);
+                } else {
+                    throw new Error('Update failed');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                errorMsg.textContent = '❌ فشل تحديث الحالة. حاول مرة أخرى.';
+                errorMsg.style.display = 'block';
+                
+                // Re-enable button
+                updateBtn.disabled = false;
+                updateBtn.textContent = 'تحديث الحالة';
+            }
+        }
+        
+        function exportToExcel() {
+            if (orders.length === 0) {
+                alert('لا توجد طلبات لتصديرها');
+                return;
+            }
+            
+            // Create CSV content
+            let csv = '﻿'; // BOM for UTF-8
+            csv += 'الرقم التعريفي,الاسم,رقم الهاتف,البريد الإلكتروني,الباقة,الحالة,التاريخ\n';
+            
+            orders.forEach(order => {
+                csv += `${order.id},`;
+                csv += `"${order.fullName}",`;
+                csv += `${order.phoneNumber},`;
+                csv += `${order.email || ''},`;
+                csv += `${getPackageLabel(order.packageType)},`;
+                csv += `${getStatusLabel(order.status)},`;
+                csv += `${formatDate(order.createdAt)}\n`;
+            });
+            
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString().split('T')[0];
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `SCL_Orders_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('✅ تم تصدير الطلبات إلى Excel بنجاح!');
+        }
+    </script>
+</body>
+</html>
